@@ -1,18 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
+  Text,
+  View
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Mic from '../components/Mic';
-import RecordButton from '../components/RecordButton';
-import NavButton from '../components/NavButton';
-import RecordingLoader from '../components/RecordingLoader';
-import { testWord, recordAudio } from '../utils/api';
+import { Mic, NavButton, RecordButton, RecordingLoader } from '../components';
 import { COLORS, SIZES } from '../constants/theme';
+import { recordAudio, testWord } from '../utils/api';
 
 const OverallTestScreen = () => {
   const navigation = useNavigation();

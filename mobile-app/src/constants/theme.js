@@ -43,11 +43,11 @@ export const FONTS = {
   light: 'SpaceGrotesk-Light',
 };
 
-export const API_BASE_URL = 'http://localhost:5000';
+export const API_BASE_URL = 'https://neuro-ai-3ipn.onrender.co';
 
 // Authentication API URL (Node.js backend)
-export const AUTH_API_URL = 'http://localhost:5000/api/auth';
+export const AUTH_API_URL = 'https://neuro-ai-3ipn.onrender.co/api/auth';
 
 // Python ML services
-export const PHONEME_API_URL = 'http://localhost:8001';
-export const CHATBOT_URL = 'http://localhost:8501';
+// export const PHONEME_API_URL = 'https://neuro-ai-3ipn.onrender.co/api/phoneme';
+// export const CHATBOT_URL = 'https://neuro-ai-3ipn.onrender.co/api/chatbot';

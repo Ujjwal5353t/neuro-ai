@@ -1,10 +1,10 @@
-import React from 'react';
-import { View, TouchableOpacity, Image, StyleSheet } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 
 const Mic = ({ onPress }) => {
   return (
-    <TouchableOpacity 
-      onPress={onPress} 
+    <TouchableOpacity
+      onPress={onPress}
       style={styles.container}
       activeOpacity={0.8}
     >

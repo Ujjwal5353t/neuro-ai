@@ -1,23 +1,34 @@
-import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS } from '../constants/theme';
+import { useAuth } from '../contexts/AuthContext';
 
 // Screens
-import HomeScreen from '../screens/HomeScreen';
-import LearningScreen from '../screens/LearningScreen';
 import AboutScreen from '../screens/AboutScreen';
 import ArticlesScreen from '../screens/ArticlesScreen';
-import DetectionScreen from '../screens/DetectionScreen';
-import OverallTestScreen from '../screens/OverallTestScreen';
+import AuthScreen from '../screens/AuthScreen';
 import CourseTestScreen from '../screens/CourseTestScreen';
+import DetectionScreen from '../screens/DetectionScreen';
+import HomeScreen from '../screens/HomeScreen';
+import LearningScreen from '../screens/LearningScreen';
+import OverallTestScreen from '../screens/OverallTestScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Bottom Tab Navigator for main screens
-const MainTabNavigator = ({ isAuthenticated, user, onLogin }) => {
+// Bottom Tab Navigator
+const MainTabNavigator = () => {
+  const { isAuthenticated } = useAuth();
+  const insets = useSafeAreaInsets();
+
+  const tabBarStyleWithInsets = {
+    paddingBottom: insets.bottom + 5,
+    paddingTop: 5,
+    height: 60 + insets.bottom,
+  };
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -38,11 +49,7 @@ const MainTabNavigator = ({ isAuthenticated, user, onLogin }) => {
         },
         tabBarActiveTintColor: COLORS.primary,
         tabBarInactiveTintColor: 'gray',
-        tabBarStyle: {
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
-        },
+        tabBarStyle: tabBarStyleWithInsets,
         headerStyle: {
           backgroundColor: COLORS.white,
         },
@@ -53,39 +60,42 @@ const MainTabNavigator = ({ isAuthenticated, user, onLogin }) => {
         headerTintColor: COLORS.black,
       })}
     >
-      <Tab.Screen 
-        name="Home" 
-        options={{ 
-          title: 'EduSync',
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          title: 'NeuroAI',
           headerShown: true,
-        }}
-      >
-        {(props) => <HomeScreen {...props} isAuthenticated={isAuthenticated} user={user} onLogin={onLogin} />}
-      </Tab.Screen>
-      
-      {isAuthenticated && (
-        <Tab.Screen 
-          name="Learning" 
-          component={LearningScreen}
-          options={{ 
-            title: 'Learning',
-          }}
-        />
-      )}
-      
-      <Tab.Screen 
-        name="About" 
-        component={AboutScreen}
-        options={{ 
-          title: 'About Us',
+          tabBarStyle: tabBarStyleWithInsets,
         }}
       />
-      
-      <Tab.Screen 
-        name="Articles" 
+
+      <Tab.Screen
+        name="Learning"
+        component={LearningScreen}
+        options={{
+          title: 'Learning',
+          // Hide from tab bar if not authenticated
+          tabBarButton: isAuthenticated ? undefined : () => null,
+          tabBarStyle: isAuthenticated ? tabBarStyleWithInsets : { display: 'none' },
+        }}
+      />
+
+      <Tab.Screen
+        name="About"
+        component={AboutScreen}
+        options={{
+          title: 'About Us',
+          tabBarStyle: tabBarStyleWithInsets,
+        }}
+      />
+
+      <Tab.Screen
+        name="Articles"
         component={ArticlesScreen}
-        options={{ 
+        options={{
           title: 'Articles',
+          tabBarStyle: tabBarStyleWithInsets,
         }}
       />
     </Tab.Navigator>
@@ -93,7 +103,7 @@ const MainTabNavigator = ({ isAuthenticated, user, onLogin }) => {
 };
 
 // Main Stack Navigator
-const AppNavigator = ({ isAuthenticated, user, onLogin }) => {
+const AppNavigator = () => {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -107,35 +117,42 @@ const AppNavigator = ({ isAuthenticated, user, onLogin }) => {
         headerTintColor: COLORS.black,
       }}
     >
-      <Stack.Screen 
-        name="MainTabs" 
+      <Stack.Screen
+        name="MainTabs"
+        component={MainTabNavigator}
         options={{ headerShown: false }}
-      >
-        {(props) => <MainTabNavigator {...props} isAuthenticated={isAuthenticated} user={user} onLogin={onLogin} />}
-      </Stack.Screen>
-      
-      <Stack.Screen 
-        name="Detection" 
+      />
+      <Stack.Screen
+        name="Auth"
+        component={AuthScreen}
+        options={{
+          title: 'Sign In',
+          headerBackTitle: 'Back',
+        }}
+      />
+
+      <Stack.Screen
+        name="Detection"
         component={DetectionScreen}
-        options={{ 
+        options={{
           title: 'Test Results',
           headerBackTitle: 'Back',
         }}
       />
-      
-      <Stack.Screen 
-        name="OverallTest" 
+
+      <Stack.Screen
+        name="OverallTest"
         component={OverallTestScreen}
-        options={{ 
+        options={{
           title: 'Overall Test',
           headerBackTitle: 'Back',
         }}
       />
-      
-      <Stack.Screen 
-        name="CourseTest" 
+
+      <Stack.Screen
+        name="CourseTest"
         component={CourseTestScreen}
-        options={{ 
+        options={{
           title: 'Course Test',
           headerBackTitle: 'Back',
         }}

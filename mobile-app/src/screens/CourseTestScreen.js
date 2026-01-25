@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
+  Text,
+  View
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Mic from '../components/Mic';
-import RecordButton from '../components/RecordButton';
-import NavButton from '../components/NavButton';
-import RecordingLoader from '../components/RecordingLoader';
-import { generateWord, recordAudio } from '../utils/api';
+import {
+  Mic,
+  NavButton,
+  RecordButton,
+  RecordingLoader
+} from '../components';
 import { COLORS, SIZES } from '../constants/theme';
+import { generateWord, recordAudio } from '../utils/api';
 
 const CourseTestScreen = () => {
   const navigation = useNavigation();
@@ -90,7 +91,8 @@ const CourseTestScreen = () => {
 
         <View style={styles.infoRow}>
           <Text style={styles.infoText}>
-            Word to be spelled: {word.charAt(0).toUpperCase() + word.slice(1)}
+            Word to be spelled: {word ? word.charAt(0).toUpperCase() + word.slice(1) : 'Loading...'}
+
           </Text>
           <Text style={styles.infoText}>
             Average Correct Percentage -{' '}
@@ -153,7 +155,7 @@ const CourseTestScreen = () => {
               onPress={recordButtonHandler}
             />
           )}
-          
+
           {attempts.length > 0 && (
             <RecordButton
               bgColor={COLORS.primary}
