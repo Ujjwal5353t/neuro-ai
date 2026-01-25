@@ -4,11 +4,13 @@ import { useAuth } from "../contexts/AuthContext";
 import Modal from "./LogoutModal";
 import AuthModal from "./AuthModal";
 import { Link } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
+import { ThemeAnimationType, useModeAnimation } from 'react-theme-switch-animation';
 
 const navigation = [
-    { name: "Home", href: "/", current: false },
-    { name: "About Us", href: "/about", current: false },
-    { name: "Articles", href: "/articles", current: false },
+  { name: "Home", href: "/", current: false },
+  { name: "About Us", href: "/about", current: false },
+  { name: "Articles", href: "/articles", current: false },
 ];
 
 function Example() {
@@ -23,20 +25,17 @@ function Example() {
         isModalOpen ? closeModal() : openModal();
     };
 
-    useEffect(() => {
-        function handleClickOutside(event) {
-            if (
-                sidebarRef.current &&
-                !sidebarRef.current.contains(event.target)
-            ) {
-                setSidebarOpen(false);
-            }
-        }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [sidebarRef]);
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+        setSidebarOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [sidebarRef]);
 
     return (
         <div>
@@ -158,8 +157,54 @@ function Example() {
                     </div>
                 </div>
             )}
+          </button>
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-md border dark:border-gray-600 dark:text-white"
+          >
+            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+          </button>
         </div>
-    );
+      </div>
+      {sidebarOpen && (
+        <div className="lg:hidden fixed inset-0 bg-gray-800 bg-opacity-75 z-10">
+          <div
+            ref={sidebarRef}
+            className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-900 shadow-lg z-20 p-4"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <div className="font-spacegroteskbold text-2xl dark:text-white">EduSync</div>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-2 rounded-md border dark:border-gray-600 dark:text-white"
+              >
+                <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              {navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="block px-4 py-2 text-lg font-spacegroteskregular text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
+                >
+                  {item.name}
+                </Link>
+              ))}
+              {!isAuthenticated && (
+                <button 
+                  onClick={() => loginWithRedirect()}
+                  className="border rounded-md p-2 font-spacegroteskregular border-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black w-full"
+                >
+                  Sign Up
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export default Example;
