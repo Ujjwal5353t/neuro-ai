@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useAuth0 } from "@auth0/auth0-react";
+import { useAuth } from "../contexts/AuthContext";
 import Modal from "./LogoutModal";
+import AuthModal from "./AuthModal";
 import { Link } from "react-router-dom";
 
 const navigation = [
@@ -11,11 +12,11 @@ const navigation = [
 ];
 
 function Example() {
-    const { user, isAuthenticated, isLoading } = useAuth0();
-    const { loginWithRedirect } = useAuth0();
+    const { user, isAuthenticated, isLoading } = useAuth();
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const sidebarRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const openModal = () => setIsModalOpen(true);
     const closeModal = () => setIsModalOpen(false);
     const togglemodal = () => {
@@ -81,7 +82,7 @@ function Example() {
                         >
                             <img
                                 className="h-10 w-10 rounded-full"
-                                src={user.picture}
+                                src={user.picture || `https://ui-avatars.com/api/?name=${user.name}&background=2D8CFF&color=fff`}
                                 alt={user.name}
                             />
                             {/* <h2>{user.name}</h2>
@@ -94,12 +95,17 @@ function Example() {
                         </div>
                     ) : (
                         <button
-                            onClick={() => loginWithRedirect()}
+                            onClick={() => setIsAuthModalOpen(true)}
                             className="border font-spacegroteskregular rounded-md p-2 border-black hover:bg-black hover:text-white"
                         >
                             Sign Up
                         </button>
                     )}
+                    <AuthModal
+                        isOpen={isAuthModalOpen}
+                        onClose={() => setIsAuthModalOpen(false)}
+                        mode="signup"
+                    />
                 </div>
                 <div className="lg:hidden mr-4">
                     <button
@@ -140,9 +146,14 @@ function Example() {
                                     {item.name}
                                 </a>
                             ))}
-                            <button className="border rounded-md p-2 font-spacegroteskregular border-black hover:bg-black hover:text-white">
-                                Sign Up
-                            </button>
+                            {!isAuthenticated && (
+                                <button 
+                                    onClick={() => setIsAuthModalOpen(true)}
+                                    className="border rounded-md p-2 font-spacegroteskregular border-black hover:bg-black hover:text-white"
+                                >
+                                    Sign Up
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>
