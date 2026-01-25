@@ -108,8 +108,6 @@ function Example() {
                 src={user.picture}
                 alt={user.name}
               />
-              {/* <h2>{user.name}</h2>
-              <p>{user.email}</p> */}
               <Modal
                 className="relative"
                 isOpen={isModalOpen}
@@ -154,7 +152,7 @@ function Example() {
             className="fixed inset-y-0 left-0 w-64 bg-white dark:bg-gray-900 shadow-lg z-20 p-4"
           >
             <div className="flex justify-between items-center mb-4">
-              <div className="font-spacegroteskbold text-2xl dark:text-white">Awaaz</div>
+              <div className="font-spacegroteskbold text-2xl dark:text-white">EduSync</div>
               <button
                 onClick={() => setSidebarOpen(false)}
                 className="p-2 rounded-md border dark:border-gray-600 dark:text-white"
@@ -164,17 +162,22 @@ function Example() {
             </div>
             <div className="space-y-4">
               {navigation.map((item) => (
-                <a
+                <Link
                   key={item.name}
-                  href={item.href}
+                  to={item.href}
                   className="block px-4 py-2 text-lg font-spacegroteskregular text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md"
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
-              <button className="border rounded-md p-2 font-spacegroteskregular border-black hover:bg-black hover:text-white">
-                Sign Up
-              </button>
+              {!isAuthenticated && (
+                <button 
+                  onClick={() => loginWithRedirect()}
+                  className="border rounded-md p-2 font-spacegroteskregular border-black hover:bg-black hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black w-full"
+                >
+                  Sign Up
+                </button>
+              )}
             </div>
           </div>
         </div>
