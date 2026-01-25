@@ -8,6 +8,7 @@ import Articles from "./Pages/Articles";
 import Detection from "./Pages/Detection"
 import Overalltest from "./Pages/Overalltest";
 import Coursetest from "./Pages/Coursetest";
+import Chatbot from "./Pages/Chatbot";
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
         <Route path="/detect/:number" element={<Detection />} />
         <Route path="/overall" element={<Overalltest />} />
         <Route path="/course" element={<Coursetest />} />
+        <Route path="/chatbot" element={<Chatbot />} />
       </Routes>
       <Footer />
     </BrowserRouter>

@@ -66,10 +66,10 @@ function Example() {
                                 Learning
                             </Link>
                             <Link
-                                to="http://localhost:8501"
+                                to="/chatbot"
                                 className="mt-2 font-spacegroteskregular cursor-pointer"
                             >
-                                Conversation
+                                Chatbot
                             </Link>
                         </div>
                     ) : (
