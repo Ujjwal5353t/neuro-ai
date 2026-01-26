@@ -1,67 +1,104 @@
-import React, { useEffect, useState } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useEffect, useState } from 'react';
 import {
-  View,
-  Text,
+  ActivityIndicator,
   ScrollView,
   StyleSheet,
-  Dimensions,
+  Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import { getRemedy } from '../utils/api';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { COLORS, SIZES } from '../constants/theme';
-
-const { width } = Dimensions.get('window');
+import { getRemedy } from '../utils/api';
 
 const DetectionScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+
   const [percentage, setPercentage] = useState(null);
   const [remedy, setRemedy] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [phoneme1, setPhoneme1] = useState('');
+  const [phoneme2, setPhoneme2] = useState('');
 
   useEffect(() => {
-    if (route.params?.percentage) {
-      setPercentage(parseInt(route.params.percentage));
+    if (route.params) {
+      setPercentage(parseInt(route.params.percentage || 0));
+      setPhoneme1(route.params.phoneme1 || 'V');
+      setPhoneme2(route.params.phoneme2 || 'B');
     }
   }, [route.params]);
 
   useEffect(() => {
     if (percentage !== null) {
-      getRemedy(percentage)
-        .then((data) => {
-          if (data && data.remedy) {
-            setRemedy(data.remedy);
-          }
-        })
-        .catch((error) => console.error('Error fetching remedy:', error));
+      fetchAIRemedy();
     }
   }, [percentage]);
+
+  const fetchAIRemedy = async () => {
+    setLoading(true);
+    try {
+      const data = await getRemedy(percentage, phoneme1, phoneme2, []);
+      if (data && data.remedy) {
+        setRemedy(data.remedy);
+      }
+    } catch (error) {
+      console.error('Error fetching remedy:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const backToLearning = () => {
     navigation.navigate('Learning');
   };
 
   const backToTryAgain = () => {
-    navigation.navigate('CourseTest');
+    navigation.goBack();
+  };
+
+  const getPerformanceEmoji = () => {
+    if (percentage >= 90) return '🏆';
+    if (percentage >= 70) return '🌟';
+    if (percentage >= 50) return '💪';
+    return '🎯';
+  };
+
+  const getPerformanceMessage = () => {
+    if (percentage >= 90) return 'Excellent!';
+    if (percentage >= 70) return 'Great Job!';
+    if (percentage >= 50) return 'Good Effort!';
+    return 'Keep Practicing!';
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Phenome V and B</Text>
+        <Text style={styles.headerTitle}>
+          Phoneme {phoneme1} and {phoneme2}
+        </Text>
       </View>
 
       {/* Test Info */}
       <View style={styles.infoSection}>
-        <Text style={styles.testNumber}>Test Number: 2</Text>
-        <Text style={styles.detailsTitle}>Details about the test:</Text>
-        
+        <Text style={styles.detailsTitle}>Test Results</Text>
+
         <View style={styles.detailsGrid}>
-          <Text style={styles.detailText}>Words to be spelled: Boat</Text>
-          <Text style={styles.detailText}>Phenome word: Voat</Text>
           <Text style={styles.detailText}>
-            Average correct percentage: {percentage}%
+            Phonemes tested: {phoneme1} and {phoneme2}
+          </Text>
+          <Text style={styles.detailText}>
+            Average accuracy: {percentage}%
+          </Text>
+          <Text style={styles.detailText}>
+            Status: {getPerformanceMessage()}
           </Text>
         </View>
       </View>
@@ -74,39 +111,55 @@ const DetectionScreen = () => {
       {/* Progress Bar */}
       <View style={styles.progressSection}>
         <View style={styles.progressBackground}>
-          <Text style={styles.trophyIcon}>🏆</Text>
+          <Text style={styles.trophyIcon}>{getPerformanceEmoji()}</Text>
+          <Text style={styles.performanceText}>{getPerformanceMessage()}</Text>
         </View>
-        
+
         <View style={styles.progressBarContainer}>
           <View
             style={[
               styles.progressBar,
-              { width: `${percentage}%` },
+              {
+                width: `${Math.min(percentage, 100)}%`,
+                backgroundColor: percentage >= 70 ? '#4CAF50' : percentage >= 50 ? '#FF9800' : '#F44336'
+              },
             ]}
           >
-            <View style={styles.characterContainer}>
-              <Text style={styles.characterIcon}>🐱</Text>
-            </View>
             <Text style={styles.percentageText}>{percentage}%</Text>
           </View>
         </View>
       </View>
 
-      {/* Model and Remedies Section */}
-      {percentage <= 50 && (
-        <View style={styles.remedySection}>
-          <View style={styles.remedyHeader}>
-            <Text style={styles.remedyTitle}>Model and Remedies</Text>
-          </View>
-          
-          <View style={styles.remedyContent}>
-            <Text style={styles.remedySubtitle}>
-              Suggested improvements for Phoneme:
-            </Text>
-            {remedy && <Text style={styles.remedyText}>{remedy}</Text>}
-          </View>
+      {/* AI-Powered Remedies Section */}
+      <View style={styles.remedySection}>
+        <View style={styles.remedyHeader}>
+          <Text style={styles.remedyTitle}>
+            {percentage >= 80 ? 'Keep It Up! 🎉' : 'AI-Powered Improvement Tips'}
+          </Text>
         </View>
-      )}
+
+        <View style={styles.remedyContent}>
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={COLORS.primary} />
+              <Text style={styles.loadingText}>
+                Generating personalized tips...
+              </Text>
+            </View>
+          ) : remedy ? (
+            <>
+              <Text style={styles.remedySubtitle}>
+                Suggested improvements for Phonemes {phoneme1} and {phoneme2}:
+              </Text>
+              <Text style={styles.remedyText}>{remedy}</Text>
+            </>
+          ) : (
+            <Text style={styles.remedyText}>
+              Great job! Keep practicing to maintain your skills.
+            </Text>
+          )}
+        </View>
+      </View>
 
       {/* Action Buttons */}
       <View style={styles.buttonContainer}>
@@ -117,7 +170,7 @@ const DetectionScreen = () => {
         >
           <Text style={styles.buttonText}>Back to Learning</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity
           style={[styles.button, styles.secondaryButton]}
           onPress={backToTryAgain}
@@ -153,12 +206,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 40,
   },
-  testNumber: {
-    fontSize: SIZES.h4,
-    fontWeight: '600',
-    color: COLORS.black,
-    marginBottom: 16,
-  },
   detailsTitle: {
     fontSize: SIZES.h4,
     fontWeight: '600',
@@ -193,38 +240,33 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   progressBackground: {
-    position: 'relative',
-    height: 200,
+    height: 150,
     backgroundColor: '#F0E5FF',
     borderRadius: SIZES.radius,
     justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingRight: 40,
+    alignItems: 'center',
     marginBottom: 16,
   },
   trophyIcon: {
-    fontSize: 80,
+    fontSize: 60,
+    marginBottom: 8,
+  },
+  performanceText: {
+    fontSize: SIZES.h3,
+    fontWeight: 'bold',
+    color: COLORS.black,
   },
   progressBarContainer: {
     height: 48,
-    backgroundColor: COLORS.purple,
+    backgroundColor: COLORS.lightGray,
     borderRadius: SIZES.smallRadius,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#9C27B0',
     justifyContent: 'center',
     alignItems: 'center',
-    position: 'relative',
-  },
-  characterContainer: {
-    position: 'absolute',
-    right: -20,
-    top: -40,
-  },
-  characterIcon: {
-    fontSize: 60,
+    minWidth: 60,
   },
   percentageText: {
     color: COLORS.white,
@@ -249,9 +291,20 @@ const styles = StyleSheet.create({
     color: COLORS.black,
   },
   remedyContent: {
-    backgroundColor: COLORS.gray,
+    backgroundColor: '#E3F2FD',
     padding: 20,
     borderRadius: SIZES.radius,
+    borderLeftWidth: 4,
+    borderLeftColor: COLORS.primary,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: SIZES.body2,
+    color: COLORS.black,
   },
   remedySubtitle: {
     fontSize: SIZES.body1,

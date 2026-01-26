@@ -1,42 +1,115 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useState } from 'react';
+import {
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import CourseModal from '../components/CourseModal';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import ArticlesComponent from '../components/ArticlesComponent';
+import CourseModal from '../components/CourseModal';
 import { COLORS, SIZES } from '../constants/theme';
+import { useAuth } from '../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
 const LearningScreen = () => {
+  const { isAuthenticated } = useAuth();
   const navigation = useNavigation();
+  const insets = useSafeAreaInsets();
+  const [selectedCourse, setSelectedCourse] = useState(null);
 
   const courses = [
-    { phoneme1: 'V', phoneme2: 'B', status: 'Continue Learning', progress: 1, color: COLORS.primary },
-    { phoneme1: 'P', phoneme2: 'F', status: 'Completed', progress: 4, color: COLORS.secondary },
-    { phoneme1: 'T', phoneme2: 'D', status: 'Continue Learning', progress: 1, color: COLORS.primary },
-    { phoneme1: 'S', phoneme2: 'Sh', status: 'Continue Learning', progress: 1, color: COLORS.primary },
-    { phoneme1: 'F', phoneme2: 'Th', status: 'Continue Learning', progress: 1, color: COLORS.primary },
-    { phoneme1: 'L', phoneme2: 'T', status: 'Continue Learning', progress: 1, color: COLORS.primary },
+    {
+      id: 1,
+      phoneme1: 'V',
+      phoneme2: 'B',
+      status: 'Continue Learning',
+      progress: 1,
+      color: COLORS.primary
+    },
+    {
+      id: 2,
+      phoneme1: 'P',
+      phoneme2: 'F',
+      status: 'Completed',
+      progress: 4,
+      color: COLORS.secondary
+    },
+    {
+      id: 3,
+      phoneme1: 'T',
+      phoneme2: 'D',
+      status: 'Continue Learning',
+      progress: 1,
+      color: COLORS.primary
+    },
+    {
+      id: 4,
+      phoneme1: 'S',
+      phoneme2: 'Sh',
+      status: 'Continue Learning',
+      progress: 1,
+      color: COLORS.primary
+    },
+    {
+      id: 5,
+      phoneme1: 'F',
+      phoneme2: 'Th',
+      status: 'Continue Learning',
+      progress: 1,
+      color: COLORS.primary
+    },
+    {
+      id: 6,
+      phoneme1: 'L',
+      phoneme2: 'T',
+      status: 'Continue Learning',
+      progress: 1,
+      color: COLORS.primary
+    },
   ];
 
   const handleOverallTest = () => {
     navigation.navigate('OverallTest');
   };
 
-  const handleCoursePress = () => {
-    navigation.navigate('CourseTest');
+  const handleCoursePress = (course) => {
+    // Navigate to CourseTest with course data
+    navigation.navigate('CourseTest', {
+      phoneme1: course.phoneme1,
+      phoneme2: course.phoneme2,
+      courseData: course
+    });
   };
 
+  if (!isAuthenticated) {
+    return (
+      <View style={styles.unauthContainer}>
+        <Text style={styles.unauthText}>Please log in to access Learning features</Text>
+        <TouchableOpacity
+          style={styles.unauthButton}
+          onPress={() => navigation.navigate('Auth')}
+        >
+          <Text style={styles.unauthButtonText}>Go to Login</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { paddingBottom: insets.bottom + 30 } // Add safe area padding
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
       {/* Detection Test Banner */}
       <View style={styles.bannerContainer}>
         <View style={styles.banner}>
@@ -76,6 +149,9 @@ const LearningScreen = () => {
             selectedDayBackgroundColor: COLORS.primary,
             selectedDayTextColor: COLORS.white,
             arrowColor: COLORS.primary,
+            textDayFontSize: 14,
+            textMonthFontSize: 16,
+            textDayHeaderFontSize: 12,
           }}
         />
       </View>
@@ -87,24 +163,20 @@ const LearningScreen = () => {
             Correct your speech with Phonemes catalog
           </Text>
         </View>
-        
-        <ScrollView 
-          style={styles.coursesList}
-          showsVerticalScrollIndicator={false}
-          nestedScrollEnabled={true}
-        >
-          {courses.map((course, index) => (
+
+        <View style={styles.coursesList}>
+          {courses.map((course) => (
             <CourseModal
-              key={index}
+              key={course.id}
               Phoneme1={course.phoneme1}
               Phoneme2={course.phoneme2}
               Status={course.status}
               Progress={course.progress}
               Color={course.color}
-              onPress={handleCoursePress}
+              onPress={() => handleCoursePress(course)}
             />
           ))}
-        </ScrollView>
+        </View>
       </View>
 
       {/* Articles Section */}
@@ -112,7 +184,7 @@ const LearningScreen = () => {
         <View style={styles.articlesHeader}>
           <Text style={styles.articlesTitle}>Recent Articles</Text>
         </View>
-        
+
         <View style={styles.articlesContainer}>
           <ArticlesComponent />
           <ArticlesComponent />
@@ -128,9 +200,39 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.background,
   },
-  bannerContainer: {
+  scrollContent: {
+    flexGrow: 1,
+  },
+  unauthContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
-    paddingTop: 10,
+    backgroundColor: COLORS.background,
+  },
+  unauthText: {
+    fontSize: SIZES.body1,
+    color: COLORS.black,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  unauthButton: {
+    backgroundColor: COLORS.secondary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: SIZES.smallRadius,
+    borderWidth: 1,
+    borderColor: COLORS.black,
+  },
+  unauthButtonText: {
+    fontSize: SIZES.body2,
+    fontWeight: '600',
+    color: COLORS.black,
+  },
+  bannerContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   banner: {
     flexDirection: 'row',
@@ -142,22 +244,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    minHeight: 140,
   },
   bannerContent: {
     flex: 1,
     justifyContent: 'center',
+    paddingRight: 10,
   },
   bannerTitle: {
-    fontSize: SIZES.h4,
+    fontSize: Math.min(SIZES.h4, width * 0.045),
     fontWeight: 'bold',
     color: COLORS.black,
     marginBottom: 8,
+    flexWrap: 'wrap',
   },
   bannerSubtitle: {
-    fontSize: SIZES.body2,
+    fontSize: Math.min(SIZES.body2, width * 0.035),
     color: COLORS.black,
     marginBottom: 16,
     fontWeight: '600',
+    flexWrap: 'wrap',
   },
   bannerButton: {
     backgroundColor: COLORS.secondary,
@@ -177,14 +283,14 @@ const styles = StyleSheet.create({
     color: COLORS.black,
   },
   bannerImagePlaceholder: {
-    width: 80,
-    height: 80,
+    width: width * 0.15,
+    minWidth: 60,
+    maxWidth: 80,
     justifyContent: 'center',
     alignItems: 'center',
-    marginLeft: 16,
   },
   bannerIcon: {
-    fontSize: 60,
+    fontSize: width * 0.12,
   },
   calendarContainer: {
     paddingHorizontal: 20,
@@ -197,6 +303,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+    overflow: 'hidden',
   },
   catalogSection: {
     paddingHorizontal: 20,
@@ -211,16 +318,16 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   catalogTitle: {
-    fontSize: SIZES.h4,
+    fontSize: Math.min(SIZES.h4, width * 0.045),
     fontWeight: '600',
     color: COLORS.black,
   },
   coursesList: {
-    maxHeight: 500,
+    // Remove ScrollView nesting - just render all items
   },
   articlesSection: {
     paddingHorizontal: 20,
-    marginBottom: 40,
+    marginBottom: 20,
   },
   articlesHeader: {
     marginBottom: 16,

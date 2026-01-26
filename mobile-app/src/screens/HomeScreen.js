@@ -1,27 +1,28 @@
-import React, { useRef } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Image,
-} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useRef } from 'react';
+import {
+  Dimensions,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
 import { COLORS, SIZES } from '../constants/theme';
+import { useAuth } from '../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 
-const HomeScreen = ({ isAuthenticated, user, onLogin }) => {
+const HomeScreen = () => {
   const navigation = useNavigation();
   const scrollViewRef = useRef(null);
+  const { isAuthenticated, user } = useAuth();
 
   const handleGetStarted = () => {
     if (isAuthenticated) {
       navigation.navigate('Learning');
     } else {
-      onLogin();
+      navigation.navigate('Auth');
     }
   };
 
@@ -95,25 +96,27 @@ const HomeScreen = ({ isAuthenticated, user, onLogin }) => {
           </Text>
           <Text style={styles.heroTitle}>Bridging the gap with</Text>
           <Text style={styles.heroTitle}>every word</Text>
-          
+
           <View style={styles.micPlaceholder}>
             <Text style={styles.micIcon}>🎤</Text>
           </View>
-          
+
           <Text style={styles.heroDescription}>
             Our goal is to empower individuals with speech challenges. Unlock your potential
             through personalized speech training.
           </Text>
-          
+
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[styles.button, styles.primaryButton]}
               onPress={handleGetStarted}
               activeOpacity={0.8}
             >
-              <Text style={styles.primaryButtonText}>Get Started</Text>
+              <Text style={styles.primaryButtonText}>
+                {isAuthenticated ? 'Continue Learning' : 'Get Started'}
+              </Text>
             </TouchableOpacity>
-            
+
             <TouchableOpacity
               style={[styles.button, styles.secondaryButton]}
               onPress={scrollToFeatures}
@@ -130,7 +133,7 @@ const HomeScreen = ({ isAuthenticated, user, onLogin }) => {
         <View style={styles.featuresHeader}>
           <Text style={styles.featuresTitle}>Features</Text>
         </View>
-        
+
         <View style={styles.featuresGrid}>
           {features.map((feature, index) => (
             <View
