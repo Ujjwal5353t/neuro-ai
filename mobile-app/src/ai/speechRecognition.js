@@ -1,4 +1,4 @@
-import { SpeechToText } from '@runanywhere/onnx';
+import { ONNX } from '@runanywhere/onnx';
 import { Audio } from 'expo-av';
 import runtimeManager from './runtime';
 
@@ -22,7 +22,6 @@ class SpeechRecognitionService {
 
     this.initializing = true;
     try {
-      // Initialize Runtime FIRST
       await runtimeManager.initialize();
 
       const { status } = await Audio.requestPermissionsAsync();
@@ -35,7 +34,8 @@ class SpeechRecognitionService {
         playsInSilentModeIOS: true,
       });
 
-      this.stt = new SpeechToText({
+      // Use ONNX.createSTT() factory method
+      this.stt = await ONNX.createSTT({
         model: 'whisper-tiny-en',
         language: 'en',
       });
@@ -50,7 +50,6 @@ class SpeechRecognitionService {
     this.initializing = false;
   }
 
-  // ... rest of the methods stay the same
   async startRecording() {
     await this.initialize();
 

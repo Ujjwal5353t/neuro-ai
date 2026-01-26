@@ -1,43 +1,25 @@
-import { ModelManager } from '@runanywhere/core';
+import { RunAnywhere } from '@runanywhere/core';
 import runtimeManager from './runtime';
 
 class AppModelManager {
   constructor() {
-    this.manager = null;
     this.modelsReady = false;
     this.initializing = false;
   }
 
-  async ensureInitialized() {
-    if (this.manager) return;
+  async initializeModels(onProgress) {
+    await runtimeManager.initialize();
+
+    if (this.modelsReady) return;
 
     if (this.initializing) {
-      while (!this.manager) {
+      while (!this.modelsReady) {
         await new Promise(r => setTimeout(r, 50));
       }
       return;
     }
 
     this.initializing = true;
-    try {
-      // Initialize Runtime FIRST
-      await runtimeManager.initialize();
-
-      // Now create ModelManager
-      this.manager = new ModelManager();
-      console.log('ModelManager initialized successfully');
-    } catch (error) {
-      console.error('Failed to initialize ModelManager:', error);
-      this.initializing = false;
-      throw error;
-    }
-    this.initializing = false;
-  }
-
-  async initializeModels(onProgress) {
-    await this.ensureInitialized();
-    if (this.modelsReady) return;
-
     try {
       console.log('Downloading AI models...');
 
@@ -59,7 +41,7 @@ class AppModelManager {
           });
         }
 
-        await this.manager.download(model.name);
+        await RunAnywhere.downloadModel(model.name);
         console.log(`Downloaded: ${model.name}`);
       }
 
@@ -67,15 +49,16 @@ class AppModelManager {
       console.log('All models ready!');
     } catch (error) {
       console.error('Failed to download models:', error);
+      this.initializing = false;
       throw error;
     }
   }
 
   async checkModelsStatus() {
-    await this.ensureInitialized();
+    await runtimeManager.initialize();
 
     try {
-      const cached = await this.manager.listCached();
+      const cached = await RunAnywhere.listCachedModels();
       return {
         whisper: cached.includes('whisper-tiny-en'),
         llm: cached.includes('smollm-135m-instruct'),
@@ -92,12 +75,11 @@ class AppModelManager {
   }
 
   async clearCache() {
-    await this.ensureInitialized();
+    await runtimeManager.initialize();
 
     try {
-      await this.manager.clearCache();
+      await RunAnywhere.clearModelCache();
       this.modelsReady = false;
-      console.log('Cache cleared successfully');
     } catch (error) {
       console.error('Failed to clear cache:', error);
       throw error;

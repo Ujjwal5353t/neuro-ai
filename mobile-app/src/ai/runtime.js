@@ -1,45 +1,37 @@
-import { Runtime } from '@runanywhere/core';
+import { RunAnywhere, SDKEnvironment } from '@runanywhere/core';
 
 class RuntimeManager {
   constructor() {
-    this.runtime = null;
     this.initialized = false;
     this.initializing = false;
   }
 
   async initialize() {
-    if (this.initialized) return this.runtime;
+    if (this.initialized) return;
 
     if (this.initializing) {
-      // Wait for initialization to complete
       while (!this.initialized) {
         await new Promise(r => setTimeout(r, 50));
       }
-      return this.runtime;
+      return;
     }
 
     this.initializing = true;
     try {
-      console.log('Initializing RunAnywhere Runtime...');
+      console.log('Initializing RunAnywhere SDK...');
 
-      // Create the Runtime instance
-      this.runtime = await Runtime.create();
+      // Initialize RunAnywhere SDK
+      await RunAnywhere.initialize({
+        environment: SDKEnvironment.production,
+      });
 
-      console.log('Runtime initialized successfully');
       this.initialized = true;
-      return this.runtime;
+      console.log('RunAnywhere SDK initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize Runtime:', error);
+      console.error('Failed to initialize RunAnywhere SDK:', error);
       this.initializing = false;
       throw error;
     }
-  }
-
-  getRuntime() {
-    if (!this.initialized) {
-      throw new Error('Runtime not initialized. Call initialize() first.');
-    }
-    return this.runtime;
   }
 }
 
