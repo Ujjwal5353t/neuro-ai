@@ -93,13 +93,13 @@ Keep response under 50 words, child-friendly.`;
         );
 
         if (accuracy >= 90) {
-            return `Excellent! You pronounced "${expectedWord}" very clearly. Keep it up! 🎉`;
+            return `🎉 Excellent! You said "${transcription}" which matches "${expectedWord}" perfectly! Your pronunciation is clear and accurate. Keep up the great work!`;
         } else if (accuracy >= 70) {
-            return `Good try! "${transcription}" is close to "${expectedWord}". Practice the sound more slowly. 👍`;
+            return `👍 Good try! You said "${transcription}" which is close to "${expectedWord}". Practice focusing on each syllable slowly. You're making progress!`;
         } else if (accuracy >= 50) {
-            return `You're getting there! Try breaking "${expectedWord}" into syllables and say each part slowly. 💪`;
+            return `💪 You're getting there! Your attempt "${transcription}" needs work on "${expectedWord}". Try breaking it into parts: Say each syllable separately, then combine them.`;
         } else {
-            return `Let's practice "${expectedWord}" together. Listen carefully and repeat after the example. 🎯`;
+            return `🎯 Let's practice "${expectedWord}" together! Listen to the example carefully, watch the mouth movements, and repeat slowly. Take your time!`;
         }
     }
 

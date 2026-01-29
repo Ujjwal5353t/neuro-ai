@@ -86,8 +86,17 @@ class SpeechRecognitionService {
                 throw new Error("Recording file does not exist");
             }
 
+            // Convert file:// URI to platform-specific path
+            let filePath = uri;
+            if (Platform.OS === 'android') {
+                // Remove file:// prefix for Android
+                filePath = uri.replace('file://', '');
+            }
+
+            console.log("Transcribing file:", filePath);
+
             // Transcribe using RunAnywhere
-            const result = await RunAnywhere.transcribeFile(uri, {
+            const result = await RunAnywhere.transcribeFile(filePath, {
                 language: "en",
             });
 

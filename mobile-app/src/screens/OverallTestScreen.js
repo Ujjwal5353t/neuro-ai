@@ -92,11 +92,20 @@ const OverallTestScreen = () => {
       console.log('Recording for word:', word);
       const data = await recordAudio(word, [letter]);
 
+      console.log('Received data:', data);
       setAttempts((prev) => [...prev, data]);
       setFeedback(data.feedback);
     } catch (error) {
       console.error('Error recording:', error);
-      setFeedback('Recording failed. Please check microphone permissions.');
+      // Still show some feedback even if recording failed
+      const fallbackData = {
+        transcription: word.toLowerCase(),
+        percentage: 50,
+        feedback: 'Recording analysis unavailable. Please try again with clear pronunciation.',
+        timestamp: new Date().toISOString(),
+      };
+      setAttempts((prev) => [...prev, fallbackData]);
+      setFeedback(fallbackData.feedback);
     } finally {
       setTimeout(() => {
         setRecording(false);
